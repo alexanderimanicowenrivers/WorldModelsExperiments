@@ -4,7 +4,8 @@ final model saved into tf_vae/vae.json
 '''
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="0" # can just override for multi-gpu systems
+# os.environ["CUDA_VISIBLE_DEVICES"]="0" # can just override for multi-gpu systems
+os.environ["CUDA_VISIBLE_DEVICES"]="-1" # can override for multi-gpu systems
 
 import tensorflow as tf
 import random
@@ -40,8 +41,9 @@ def count_length_of_filelist(filelist):
       print("loading file", i)
   return  total_length
 
-def create_dataset(filelist, N=10000, M=1000): # N is 10000 episodes, M is number of timesteps
-  data = np.zeros((M*N, 64, 64, 3), dtype=np.uint8)
+  # def create_dataset(filelist, N=10000, M=1000): # N is 10000 episodes, M is number of timesteps
+def create_dataset(filelist, N=10, M=5):  # N is 10 episodes, M is number of timesteps
+  data = np.zeros((M*N, 96, 96, 3), dtype=np.uint8)
   idx = 0
   for i in range(N):
     filename = filelist[i]
@@ -60,7 +62,7 @@ def create_dataset(filelist, N=10000, M=1000): # N is 10000 episodes, M is numbe
 # load dataset from record/*. only use first 10K, sorted by filename.
 filelist = os.listdir(DATA_DIR)
 filelist.sort()
-filelist = filelist[0:10000]
+# filelist = filelist[0:10000] #remove for temporary training
 #print("check total number of images:", count_length_of_filelist(filelist))
 dataset = create_dataset(filelist)
 
@@ -82,13 +84,15 @@ vae = ConvVAE(z_size=z_size,
 # train loop:
 print("train", "step", "loss", "recon_loss", "kl_loss")
 for epoch in range(NUM_EPOCH):
+  print(epoch,NUM_EPOCH)
   np.random.shuffle(dataset)
   for idx in range(num_batches):
+    print(idx, num_batches)
     batch = dataset[idx*batch_size:(idx+1)*batch_size]
 
     obs = batch.astype(np.float)/255.0
 
-    feed = {vae.x: obs,}
+    feed = {vae.x: obs}
 
     (train_loss, r_loss, kl_loss, train_step, _) = vae.sess.run([
       vae.loss, vae.r_loss, vae.kl_loss, vae.global_step, vae.train_op

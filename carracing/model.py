@@ -5,10 +5,9 @@ import json
 import sys
 
 from env import make_env
-import time
 
-from vae.vae import ConvVAE
-from rnn.rnn import hps_sample, MDNRNN, rnn_init_state, rnn_next_state, rnn_output, rnn_output_size
+from vae import ConvVAE
+from rnn import hps_sample, MDNRNN, rnn_init_state, rnn_next_state, rnn_output, rnn_output_size
 
 render_mode = True
 
@@ -87,7 +86,7 @@ class Model:
   def encode_obs(self, obs):
     # convert raw obs to z, mu, logvar
     result = np.copy(obs).astype(np.float)/255.0
-    result = result.reshape(1, 64, 64, 3)
+    result = result.reshape(1, 96, 96, 3)
     mu, logvar = self.vae.encode_mu_logvar(result)
     mu = mu[0]
     logvar = logvar[0]

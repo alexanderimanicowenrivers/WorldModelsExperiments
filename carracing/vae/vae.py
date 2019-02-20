@@ -31,13 +31,18 @@ class ConvVAE(object):
     self.g = tf.Graph()
     with self.g.as_default():
 
-      self.x = tf.placeholder(tf.float32, shape=[None, 64, 64, 3])
+      self.x = tf.placeholder(tf.float32, shape=[None, 96, 96, 3])
 
       # Encoder
+      # [N, 47, 47, 32]
       h = tf.layers.conv2d(self.x, 32, 4, strides=2, activation=tf.nn.relu, name="enc_conv1")
+      # [N, 22, 22, 64]
       h = tf.layers.conv2d(h, 64, 4, strides=2, activation=tf.nn.relu, name="enc_conv2")
+      # [N, 10, 10, 128]
       h = tf.layers.conv2d(h, 128, 4, strides=2, activation=tf.nn.relu, name="enc_conv3")
-      h = tf.layers.conv2d(h, 256, 4, strides=2, activation=tf.nn.relu, name="enc_conv4")
+      # [N, 2, 2, 256]
+      h = tf.layers.conv2d(h, 256, 8, strides=2, activation=tf.nn.relu, name="enc_conv4")
+      # [N, 1, 1, 1024]
       h = tf.reshape(h, [-1, 2*2*256])
 
       # VAE
@@ -47,13 +52,19 @@ class ConvVAE(object):
       self.epsilon = tf.random_normal([self.batch_size, self.z_size])
       self.z = self.mu + self.sigma * self.epsilon
 
+      #need to fix so it recreates 96 x 96 x 3.
       # Decoder
       h = tf.layers.dense(self.z, 4*256, name="dec_fc")
+      # [N, 1, 1, 1024]
       h = tf.reshape(h, [-1, 1, 1, 4*256])
-      h = tf.layers.conv2d_transpose(h, 128, 5, strides=2, activation=tf.nn.relu, name="dec_deconv1")
-      h = tf.layers.conv2d_transpose(h, 64, 5, strides=2, activation=tf.nn.relu, name="dec_deconv2")
-      h = tf.layers.conv2d_transpose(h, 32, 6, strides=2, activation=tf.nn.relu, name="dec_deconv3")
-      self.y = tf.layers.conv2d_transpose(h, 3, 6, strides=2, activation=tf.nn.sigmoid, name="dec_deconv4")
+      # [N, 12, 12, 128]
+      h = tf.layers.conv2d_transpose(h, 128, 12, strides=2, activation=tf.nn.relu, name="dec_deconv1")
+      # [N, 24, 24, 64]
+      h = tf.layers.conv2d_transpose(h, 64, 2, strides=2, activation=tf.nn.relu, name="dec_deconv2")
+      # [N, 48, 48, 32]
+      h = tf.layers.conv2d_transpose(h, 32, 2, strides=2, activation=tf.nn.relu, name="dec_deconv3")
+      # [N, 96, 96, 3]
+      self.y = tf.layers.conv2d_transpose(h, 3, 2, strides=2, activation=tf.nn.sigmoid, name="dec_deconv4")
       
       # train ops
       if self.is_training:

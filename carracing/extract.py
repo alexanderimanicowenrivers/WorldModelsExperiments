@@ -9,10 +9,13 @@ import gym
 
 from model import make_model
 
-MAX_FRAMES = 1000 # max length of carracing
-MAX_TRIALS = 200 # just use this to extract one trial. 
+# MAX_FRAMES = 1000 # max length of carracing
+# MAX_TRIALS = 200 # just use this to extract one trial.
 
-render_mode = False # for debugging.
+MAX_FRAMES = 5 # max length of carracing
+MAX_TRIALS = 200 # just use this to extract one trial.
+
+render_mode = True # for debugging.
 
 DIR_NAME = 'record'
 if not os.path.exists(DIR_NAME):
@@ -45,7 +48,6 @@ for trial in range(MAX_TRIALS): # 200 trials per worker
         model.env.render("rgb_array")
 
       recording_obs.append(obs)
-
       z, mu, logvar = model.encode_obs(obs)
       action = model.get_action(z)
 
