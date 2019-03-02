@@ -1,3 +1,7 @@
+#Notes
+# need import model, ConvVAE and MDN-RNN
+# need to refactor world model once its all in and working
+# make a world model class which we can call to extract features with option (use vision only)
 #### INITIAL SETTINGS
 
 cuda_device="-1" # CPU "-1" or "0" for GPU
