@@ -1,8 +1,18 @@
 #### INITIAL SETTINGS
 
 cuda_device="-1" # CPU "-1" or "0" for GPU
-z_size = 32
-batch_size = 2 # usually batch size is 100
+
+MAX_FRAMES = 100 # Random Extractor: max length of carracing, usually 1000
+MAX_TRIALS = 4 # Random Extractor: just use this to extract one trial, usually 10000
+
+z_size = 32 # ConvVAE
+batch_size = 2 # ConvVAE MDN-RNNand usually batch size is 100
+learning_rate = 0.0001 # ConvVAE
+NUM_EPOCH = 10 # ConvVAE
+kl_tolerance = 0.5 # MDN-RNN
+learning_rate_rnn=0.001 # MDN-RNN
+
+
 
 ################################# Extract frames ################################# Extract frames
 
@@ -16,12 +26,6 @@ import os
 import gym
 
 from model import make_model
-
-# MAX_FRAMES = 1000 # max length of carracing
-# MAX_TRIALS = 10000 # just use this to extract one trial.
-print("change extract settings back in extract.py")
-MAX_FRAMES = 100 # max length of carracing
-MAX_TRIALS = 4 # just use this to extract one trial.
 
 render_mode = False # for debugging.
 
@@ -86,12 +90,6 @@ np.set_printoptions(precision=4, edgeitems=6, linewidth=100, suppress=True)
 
 from vae.vae import ConvVAE, reset_graph
 
-# Hyperparameters for ConvVAE
-learning_rate = 0.0001
-kl_tolerance = 0.5
-
-# Parameters for training
-NUM_EPOCH = 10
 DATA_DIR = "record"
 
 model_save_path = "tf_vae"
@@ -195,8 +193,6 @@ import time
 
 from rnn.rnn import HyperParams, MDNRNN
 
-os.environ["CUDA_VISIBLE_DEVICES"] = cuda_device
-np.set_printoptions(precision=4, edgeitems=6, linewidth=100, suppress=True)
 
 DATA_DIR = "series"
 model_save_path = "tf_rnn"
@@ -227,7 +223,7 @@ def default_hps():
                      batch_size=batch_size,   # minibatch sizes
                      grad_clip=1.0,
                      num_mixture=5,   # number of mixtures in MDN
-                     learning_rate=0.001,
+                     learning_rate=learning_rate_rnn,
                      decay_rate=1.0,
                      min_learning_rate=0.00001,
                      use_layer_norm=0, # set this to 1 to get more stable results (less chance of NaN), but slower
